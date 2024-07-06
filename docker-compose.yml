@@ -4,7 +4,7 @@ services:
     image: 'postgres:12'
   redis:
     image: 'redis:7'
-  server:
+  api:
     build: 
       dockerfile: Dockerfile.dev
       context: ./server
