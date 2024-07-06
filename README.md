@@ -1,9 +1,17 @@
 # fibonacci-calculator
-- A simple fibonacci sequence calculator application created to showcase complex application deployment with automated CI/CD integration
+- A simple fibonacci sequence calculator application created to showcase complex application deployment with automated CI/CD integration:
+    - `React` frontend
+    - `Express` backend
+    - Store data in `redis` and in `postgres` (intentional complexity for practice purposes!)
+    - Use `nginx` to route incoming requests in development
+
+# start
+- clone the repo:
+    - `git clone https://github.com/gakalmar/fibonacci-calculator.git`
+- start app simply with the following command in the project root:
+    - `docker-compose up`
 
 # guide
-- Arhitecture in video 116
-
 - Worker folder (calculate number based on index and connect to redis)
     - package.json
     - keys.js
