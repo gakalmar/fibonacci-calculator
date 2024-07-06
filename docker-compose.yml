@@ -1,6 +1,8 @@
 version: '3'
 services:
   postgres:
+    environment:
+      - POSTGRES_PASSWORD=postgres_password
     image: 'postgres:12'
   redis:
     image: 'redis:7'
@@ -19,7 +21,6 @@ services:
       - PGDATABASE=postgres
       - PGPASSWORD=postgres_password
       - PGPORT=5432
-      - POSTGRES_PASSWORD=postgres_password
   client:
     stdin_open: true
     build:
