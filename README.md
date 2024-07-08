@@ -65,3 +65,33 @@
                 - React build files for production, which are connected through another `nginx` image, listening on port 3000 
                     - this `nginx` will also need a `default.conf` file inside the client folder!
                 - Express server, listening on port 5000
+
+- Set up testing phase:
+    - For now, we just clean the `App.test.js` file, but we would put the tests in here
+    - The test is only set up to run tests for the `client`, but we could also add tests for `worker` and `server` here
+
+- Connect github repo to Travis:
+    - Go to `https://www.travis-ci.com/`, where if you have the connection already set to your github repo, you should see your project
+    - Create the `.travis.yml` file, that includes the instructions for the pipeline:
+        - Connect to docker
+        - `before_install` section:
+            - Create a test image for testing purposes (use the `dev` Dockerfile, because we also need the dependencies!)
+        - `scripts`:
+            - We do the testing in this phase. If a script returns with a result other than 0, the pipeline is stopped
+        - `afrer_success`:
+            - This section only runs if all tests were successful
+            - We are building all 4 production images here (`client`, `server`, `worker`, `nginx`)
+            - We are also pushing these images to `DockerHub`, for which we need to connect to the `Docker CLI`:
+                - Docker login:
+                    - to add the dockerID and password securely, we enter these as secrets in Travis:
+                        - click on repo in the Travis UI, then on 'more options' -> 'settings' -> 'environment variables':
+                            - Add name:
+                                - name: `DOCKER_ID`
+                                - value: `gakalmar`
+                            - Add password:
+                                - name: `DOCKER_PASSWORD`
+                                - value: `<your password>`
+                    - Now we can add the actual command:
+                        - docker login DOCKER_ID DOCKER_PASSWORD
+                        - `
+                - Push the images
