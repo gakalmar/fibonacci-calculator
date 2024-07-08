@@ -11,13 +11,13 @@
 - start app simply with the following command in the project root:
     - `docker-compose up`
 
-# guide
+# development deployment guide
 - Worker folder (calculate number based on index and connect to redis)
     - package.json
     - keys.js
     - index.js
 
-- Server folder (connect ro postgres and create table, connect to redis, express routes)
+- Server folder (connect to postgres and create table, connect to redis, express routes)
     - package.json
     - keys.js
     - index.js
@@ -52,3 +52,16 @@
             - `/` requests should be routed to the react upstream server
             - `/api` requests should be routed to the express upstream server (on the server the `/api` part is not there anymore, it's just used for the nginx routing!)
         - Add Dockerfile for nginx, to copy the config file accross!
+
+# production deployment guide
+- Create `Dockerfiles` for each service for **production** instead of the ones created for **development**
+    - `worker`: only change CMD command to `npm run start` from `npm run dev`
+    - `server`: only change CMD command to `npm run start` from `npm run dev`
+    - `nginx`: no changesV
+    - `client`:
+        - architecutre that needs to be set up:
+            - first a request gets to the `nginx` router, listening on port 80
+            - this is responsible for forwarding the requests to the backends:
+                - React build files for production, which are connected through another `nginx` image, listening on port 3000 
+                    - this `nginx` will also need a `default.conf` file inside the client folder!
+                - Express server, listening on port 5000
