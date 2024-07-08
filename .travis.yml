@@ -1,0 +1,23 @@
+language: generic
+sudo: required
+services:
+  - docker
+
+before_install:
+  - docker build -t gakalmar/fibonacci-calculator-test -f ./client/Dockerfile.dev ./client
+
+script:
+  - docker run -e CI=true gakalmar/fibonacci-calculator-test npm run test
+
+after_success:
+  - docker build -t gakalmar/fibonacci-calculator-client -f ./client
+  - docker build -t gakalmar/fibonacci-calculator-worker -f ./worker
+  - docker build -t gakalmar/fibonacci-calculator-server -f ./server
+  - docker build -t gakalmar/fibonacci-calculator-nginx -f ./nginx
+
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
+
+  - docker push gakalmar/fibonacci-calculator-client
+  - docker push gakalmar/fibonacci-calculator-worker
+  - docker push gakalmar/fibonacci-calculator-server
+  - docker push gakalmar/fibonacci-calculator-nginx
