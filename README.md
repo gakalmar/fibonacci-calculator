@@ -92,6 +92,5 @@
                                 - name: `DOCKER_PASSWORD`
                                 - value: `<your password>`
                     - Now we can add the actual command:
-                        - docker login DOCKER_ID DOCKER_PASSWORD
-                        - `
+                        - `echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin`
                 - Push the images
