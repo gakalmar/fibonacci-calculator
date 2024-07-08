@@ -10,10 +10,10 @@ script:
   - docker run -e CI=true gakalmar/fibonacci-calculator-test npm run test
 
 after_success:
-  - docker build -t gakalmar/fibonacci-calculator-client -f ./client
-  - docker build -t gakalmar/fibonacci-calculator-worker -f ./worker
-  - docker build -t gakalmar/fibonacci-calculator-server -f ./server
-  - docker build -t gakalmar/fibonacci-calculator-nginx -f ./nginx
+  - docker build -t gakalmar/fibonacci-calculator-client -f ./client/Dockerfile ./client
+  - docker build -t gakalmar/fibonacci-calculator-worker -f ./worker/Dockerfile ./worker
+  - docker build -t gakalmar/fibonacci-calculator-server -f ./server/Dockerfile ./server
+  - docker build -t gakalmar/fibonacci-calculator-nginx -f ./nginx/Dockerfile ./nginx
 
   - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
 
