@@ -94,3 +94,72 @@
                     - Now we can add the actual command:
                         - `echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin`
                 - Push the images
+
+- Deployment to AWS Elastic Beanstalk:
+    - `Create a Dockerrun.aws.json` file - this will be the instructions file for AWS (similar to docker-compose, but instead of *services*, we will have *container definitions*):
+        - We already have the images uploaded to DockerHub, so we are just managing these
+        - The documentation we will use is here: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definition_parameters.html#container_definitions
+    - Creating the DB services:
+        - **OPTION 1:** The DB storage will be updated in a real production environment:
+            - `Redis` should run inside the `AWS ElastiCache` or `EC`
+            - `Postgres` should run inside the `AWS Relational Database Service` or `RDS`
+
+            1. Create `RDS`:
+                - Create with simple-create
+                - Select `Postgres`
+                - In `Settings` add a cluster identifier (name), set "self managed" for credentials and set the same password you are using as the env variable
+                - Create new SG
+                - Database name: fibvalues (this wasn't filled anywhere!)
+
+            2. Create `ElastiCache`: (maybe we need to create a "Global datastore" instead?)
+                - Create Redis OSS
+                - Design your own / Easy Create
+                - Select Demo mode for cheapest version
+                - Add name
+                - Add sybnet name (eg redis group)
+            
+            - To establish connection between these services, we need to create a new `Security Group`, that says "allow any traffic from any other AWS service that has the same SG":
+                - In VPC dashboard create a new SG:
+                    - add name
+                    - add inbound rule: Custom TCP / TCP / port 5432-6379 / allow from newly created SG
+                - Assign this SH to the EB instance, the RDS and the ED (add as second, don't need to remove the original!)
+
+        - **OPTION 2:** But we will still make our DB services using containers, for practice of Docker!
+    
+    - Add environmental variables to Elastic Beanstalk:
+        - Click on the environment -> Configuration / Configure updates, monitoring, and logging / Platform software  / Environment properties:
+            - Add `REDIS_HOST` with elasticache's Primary endpoint as a value, without the port! (As I'm using Redis OSS cache, there's no Primary Endpoint, so I'm using the configuration endpoint)
+            - Add `REDIS_PORT` with 6379 (default port)
+            - Add `PGUSER` with "postgres" or what you used
+            - Add `PGPASSWORD` with "postgres_password" or what you used
+            - Add `PGHOST` with RDS / Instances -> click on instance -> under Connectivity & Security you can find the Endpoint to add
+            - Add `PGDATABASE` with DB instance ID as a value (same as the name of the RDS you created)
+            - Add `PGPORT` with 5432 (default port)
+        - **Note:** As opposed to docker-compose, where we add the ENV variables to each service, here the ENV variables added to the Elastic Beanstalk will be shared with all containers listed in the Dockerrun file
+    
+    - Create access with IAM user:
+        - Go to AWS console / IAM:
+            - Create a new user with deploy access to Elastic Beanstalk:
+                - Click on User -> Create User -> add name like "fibonacci-calculator-deployer" (don't need to add console access!)
+                - Attach existing policies -> Add all policies related to "beanstalk" (up to 10 only!)
+            - Add Access keys ("other" type -> Don't forget to download .csv file!)
+        
+        - Got to `travis.ci` site, select the project, and under Settings / Environmental variables add:
+            - `AWS_ACCESS_KEY` with the user's access key as a value
+            - `AWS_SECRET_KEY` with the user's secret access key as a value
+    
+    - In `.travis.yml` file:
+        - We need to add our AWS credentials (`$AWS_ACCESS_KEY` and `$AWS_SECRET_KEY`)
+        - Add `deploy` section:
+            
+                deploy:
+                    provider: elasticbeanstalk
+                    region: eu-west-2
+                    app: fibonacci-calculator (get this from Elastic Beanstalk / your environment / App name)
+                    env: Fibonacci-calculator-env (different than the app name!)
+                    bucket_name: elasticbeanstalk-eu-west-2-891376988072 (this gets generated automatically!)
+                    bucket_path: fibonacci-calculator (can be same as app name)
+                    on:
+                        branch: main
+                    access_key_id: $AWS_ACCESS_KEY
+                    secret_access_key: $AWS_SECRET_KEY
