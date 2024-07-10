@@ -21,3 +21,15 @@ after_success:
   - docker push gakalmar/fibonacci-calculator-worker
   - docker push gakalmar/fibonacci-calculator-server
   - docker push gakalmar/fibonacci-calculator-nginx
+
+deploy:
+  provider: elasticbeanstalk
+  region: eu-west-2
+  app: fibonacci-calculator
+  env: Fibonacci-calculator-env
+  bucket_name: elasticbeanstalk-eu-west-2-891376988072
+  bucket_path: fibonacci-calculator
+  on:
+    branch: main
+  access_key_id: $AWS_ACCESS_KEY
+  secret_access_key: $AWS_SECRET_KEY
