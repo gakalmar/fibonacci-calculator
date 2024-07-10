@@ -66,6 +66,9 @@
                     - this `nginx` will also need a `default.conf` file inside the client folder!
                 - Express server, listening on port 5000
 
+    - Add memory allocation to each one as well!
+        - `"memory": 128`
+
 - Set up testing phase:
     - For now, we just clean the `App.test.js` file, but we would put the tests in here
     - The test is only set up to run tests for the `client`, but we could also add tests for `worker` and `server` here
