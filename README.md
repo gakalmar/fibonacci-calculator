@@ -103,7 +103,7 @@
         - We already have the images uploaded to DockerHub, so we are just managing these
         - The documentation we will use is here: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definition_parameters.html#container_definitions
     - Creating the DB services:
-        - **OPTION 1:** The DB storage will be updated in a real production environment:
+        - The DB storage will be updated in a real production environment:
             - `Redis` should run inside the `AWS ElastiCache` or `EC`
             - `Postgres` should run inside the `AWS Relational Database Service` or `RDS`
 
@@ -127,8 +127,6 @@
                     - add inbound rule: Custom TCP / TCP / port 5432-6379 / allow from newly created SG
                 - Assign this SH to the EB instance, the RDS and the ED (add as second, don't need to remove the original!)
 
-        - **OPTION 2:** But we will still make our DB services using containers, for practice of Docker!
-    
     - Add environmental variables to Elastic Beanstalk:
         - Click on the environment -> Configuration / Configure updates, monitoring, and logging / Platform software  / Environment properties:
             - Add `REDIS_HOST` with elasticache's Primary endpoint as a value, without the port! (As I'm using Redis OSS cache, there's no Primary Endpoint, so I'm using the configuration endpoint)
@@ -140,11 +138,12 @@
             - Add `PGPORT` with 5432 (default port)
         - **Note:** As opposed to docker-compose, where we add the ENV variables to each service, here the ENV variables added to the Elastic Beanstalk will be shared with all containers listed in the Dockerrun file
     
-    - Create access with IAM user:
+    - Create access with IAM user (for simplicity the admin user can be used):
         - Go to AWS console / IAM:
             - Create a new user with deploy access to Elastic Beanstalk:
                 - Click on User -> Create User -> add name like "fibonacci-calculator-deployer" (don't need to add console access!)
                 - Attach existing policies -> Add all policies related to "beanstalk" (up to 10 only!)
+                - Probably some S3 bucket access also needs to be added, because it runs into errors otherwise
             - Add Access keys ("other" type -> Don't forget to download .csv file!)
         
         - Got to `travis.ci` site, select the project, and under Settings / Environmental variables add:
@@ -166,3 +165,6 @@
                         branch: main
                     access_key_id: $AWS_ACCESS_KEY
                     secret_access_key: $AWS_SECRET_KEY
+    
+    - Once the app is deployed, the Elastic Beanstalk status should be updated to `Health: Ok`
+        - Then you can access the link to the app, from the `Applications` / Click on your app, then use the link under `Domain`
