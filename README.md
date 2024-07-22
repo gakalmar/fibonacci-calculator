@@ -11,6 +11,9 @@
 - start app simply with the following command in the project root:
     - `docker-compose up`
 
+- for a Kubernetes deployment solution please refer to the following project:
+    - `https://github.com/gakalmar/fibonacci-calculator-k8s.git`
+
 # development deployment guide
 - Worker folder (calculate number based on index and connect to redis)
     - package.json
